@@ -4,6 +4,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="manifest.json">
+
     <title>Nota de Venta - Ben & Frank</title>
     <style>
         body {
@@ -352,6 +354,10 @@
         /* Guardar PDF: reutiliza la ventana nueva + print => el usuario usa "Guardar como PDF" */
         function guardarPDF() {
             imprimirNota();
+        }
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("service-worker.js")
+                .catch(err => console.log("SW error:", err));
         }
     </script>
 </body>
