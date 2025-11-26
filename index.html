@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Nota de Venta - Ben & Frank</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f6f6f6;
+        }
+
+        .wrap {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        label {
+            font-weight: 700;
+            display: block;
+            margin-top: 12px;
+        }
+
+        select,
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-top: 6px;
+            border: 1px solid #bbb;
+            border-radius: 3px;
+        }
+
+        button.primary {
+            width: 100%;
+            padding: 12px;
+            margin-top: 14px;
+            background: #111;
+            color: #fff;
+            border: none;
+            font-size: 15px;
+        }
+
+        /* nota visual */
+        #notaVentaWrapper {
+            margin-top: 22px;
+        }
+
+        .nota {
+            width: 15cm;
+            background: #fff;
+            padding: 18px;
+            border: 1px solid #111;
+            box-sizing: border-box;
+            position: relative;
+            font-size: 14px;
+        }
+
+        .logo {
+            width: 5cm;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .note-number-box {
+            position: absolute;
+            right: 16px;
+            top: 16px;
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: right;
+            background: #fff;
+        }
+
+        .line {
+            border-bottom: 1px solid #444;
+            padding: 6px 0;
+            margin: 6px 0;
+        }
+
+        .desc-line {
+            margin: 6px 0;
+        }
+
+        .bold {
+            font-weight: 700;
+        }
+
+        /* inputs inline inside note */
+        .inline-input {
+            border: none;
+            border-bottom: 1px solid #000;
+            padding: 2px 4px;
+            min-width: 140px;
+            font-size: 14px;
+        }
+
+        /* Controles que aparecen sólo después */
+        #controls {
+            display: none;
+            max-width: 720px;
+            margin: 12px auto 0;
+        }
+
+        /* IMPRESIÓN: ocultar todo excepto la nota */
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+
+            #notaParaImprimir,
+            #notaParaImprimir * {
+                visibility: visible !important;
+            }
+
+            #notaParaImprimir {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+
+        <h1 style="text-align:center;">Generar Nota de Venta</h1>
+
+        <!-- FORMULARIO -->
+        <div id="formArea">
+            <label>Armazón</label>
+            <select id="armazonSelect" aria-label="Armazon">
+                <option value="annie">annie</option>
+                <option value="barragan">barragan</option>
+                <option value="dafna">dafna</option>
+                <option value="bill">bill</option>
+                <option value="artigas">artigas</option>
+                <option value="dave">dave</option>
+            </select>
+
+            <label>Color</label>
+            <select id="colorSelect" aria-label="Color"></select>
+
+            <label>Graduación</label>
+            <select id="graduacionSelect">
+                <option value="monofocal">monofocal</option>
+                <option value="progresivo newton">progresivo newton</option>
+                <option value="progresivo newton plus">progresivo newton plus</option>
+                <option value="sin graduacion">sin graduacion</option>
+            </select>
+
+            <label>Cristal</label>
+            <select id="cristalSelect">
+                <option value="antireflejante verde">antireflejante verde</option>
+                <option value="antireflejante azul">antireflejante azul</option>
+                <option value="fotocromatico">fotocromatico</option>
+            </select>
+
+            <label>Extras</label>
+            <select id="extraSelect">
+                <option value="-- ninguno --">-- ninguno --</option>
+                <option value="hi-index">hi-index</option>
+            </select>
+
+            <label>Cliente</label>
+            <input type="text" id="clienteInput" placeholder="Nombre del cliente">
+
+            <label>RUT</label>
+            <input type="text" id="rutInput" placeholder="RUT">
+
+            <label>Teléfono</label>
+            <input type="text" id="telefonoInput" placeholder="Teléfono">
+
+            <label>Local (valor por defecto si quieres)</label>
+            <input type="text" id="localField" placeholder="Local (ej: costanera)">
+
+            <label>Precio Total ($)</label>
+            <input type="number" id="totalField" placeholder="123456">
+
+            <button class="primary" onclick="generarNota()">Generar Nota</button>
+        </div>
+
+        <!-- Controles que emergen -->
+        <div id="controls">
+            <button style="padding:10px; width:48%; margin-right:4%; display:inline-block;"
+                onclick="imprimirNota()">Imprimir</button>
+            <button style="padding:10px; width:48%; display:inline-block;" onclick="guardarPDF()">Guardar PDF</button>
+        </div>
+
+        <!-- Aqui se renderiza la nota (fuera del formArea para evitar ocultación en print) -->
+        <div id="notaVentaWrapper" aria-live="polite"></div>
+
+    </div>
+
+    <script>
+        /* datos armazón -> colores (solo las opciones que pediste) */
+        const colores = {
+            annie: ["rojo", "verde"],
+            barragan: ["cosmico", "azul"],
+            dafna: ["nube", "cielo", "estrellas"],
+            bill: ["aguas", "fuego"],
+            artigas: ["metalico", "bronce"],
+            dave: ["pomaire", "rancagua"]
+        };
+
+        const armazonSelect = document.getElementById('armazonSelect');
+        const colorSelect = document.getElementById('colorSelect');
+
+        /* llenar armazon / colores inicial */
+        function llenarArmazones() {
+            // llenar colores según armazon inicial
+            actualizarColores();
+        }
+        function actualizarColores() {
+            const val = armazonSelect.value;
+            colorSelect.innerHTML = '';
+            (colores[val] || []).forEach(c => {
+                const o = document.createElement('option');
+                o.value = c;
+                o.textContent = c;
+                colorSelect.appendChild(o);
+            });
+        }
+        armazonSelect.addEventListener('change', actualizarColores);
+        llenarArmazones();
+
+        /* correlativo simple en localStorage */
+        function obtenerCorrelativo(increment = true) {
+            let n = localStorage.getItem('nota_correlativo');
+            n = n ? parseInt(n, 10) : 0;
+            if (increment) { n += 1; localStorage.setItem('nota_correlativo', String(n)); }
+            return String(n).padStart(8, '0');
+        }
+
+        /* escape simple para seguridad */
+        function esc(t) { return String(t === null || t === undefined ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+        /* generar nota: crea el HTML de la nota y lo inserta en #notaVentaWrapper */
+        function generarNota() {
+            // recoger valores del formulario
+            const cliente = document.getElementById('clienteInput').value.trim();
+            const rut = document.getElementById('rutInput').value.trim();
+            const tel = document.getElementById('telefonoInput').value.trim();
+            const armazon = document.getElementById('armazonSelect').value;
+            const color = document.getElementById('colorSelect').value;
+            const grad = document.getElementById('graduacionSelect').value;
+            const cristal = document.getElementById('cristalSelect').value;
+            const extra = document.getElementById('extraSelect').value;
+            const localDefault = document.getElementById('localField').value || '';
+            const totalDefault = document.getElementById('totalField').value || '';
+
+            const codigoConsignacion = Math.floor(1000000000 + Math.random() * 9000000000);
+            const correlativo = obtenerCorrelativo(true);
+            const fecha = new Date().toLocaleDateString('es-CL');
+
+            // líneas de descripción (cada una en su propia línea)
+            const descLines = [
+                `Armazón: ${armazon} (${color})`,
+                `Graduación: ${grad}`,
+                `Cristal: ${cristal}`,
+            ];
+            if (extra && extra !== '-- ninguno --') descLines.push(`Extra: ${extra}`);
+
+            // crear HTML de la nota; LOCAL y TOTAL serán inputs editables dentro de la nota
+            const notaHTML = `
+        <div class="nota" id="notaParaImprimir" role="region" aria-label="Nota de Venta">
+            <!-- logo a la izquierda (si agregas logo.png en la misma carpeta, aparecerá) -->
+            <img src="logo.png" alt="Ben & Frank" class="logo" onerror="this.style.display='none'">
+            <div class="note-number-box">
+                <div class="bold">NOTA DE VENTA</div>
+                <div>Nº ${esc(correlativo)}</div>
+                <div>${esc(fecha)}</div>
+            </div>
+
+            <div class="line"><span class="bold">Código de consignación:</span> ${esc(codigoConsignacion)}</div>
+
+            <div class="line"><span class="bold">Nombre Cliente:</span> ${esc(cliente)}</div>
+
+            <div class="line"><span class="bold">RUT:</span> ${esc(rut)} &nbsp;&nbsp; <span class="bold">Teléfono:</span> ${esc(tel)}</div>
+
+            <div class="line small-text"><span class="bold">Descripción:</span><br>
+                ${descLines.map(l => esc(l)).join('<br>')}
+            </div>
+
+            <div class="line">
+                <span class="bold">Local:</span>
+                <input id="nota_local" class="inline-input" type="text" value="${esc(localDefault)}">
+            </div>
+
+            <div class="line">
+                <span class="bold">Total:</span>
+                <input id="nota_total" class="inline-input" type="text" value="${esc(totalDefault)}">
+            </div>
+        </div>
+    `;
+
+            const wrapper = document.getElementById('notaVentaWrapper');
+            wrapper.innerHTML = notaHTML;
+
+            // mostrar controles
+            document.getElementById('controls').style.display = 'block';
+
+            // desplazar a la nota (UX)
+            setTimeout(() => {
+                const el = document.getElementById('notaParaImprimir');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 150);
+        }
+
+        /* Imprimir: abrimos una ventana nueva con solo la nota y llamamos print() */
+        function imprimirNota() {
+            const nota = document.getElementById('notaParaImprimir');
+            if (!nota) { alert('Primero genera la nota.'); return; }
+
+            const w = window.open('', '_blank');
+            if (!w) { alert('No se pudo abrir ventana nueva. Revisa bloqueo de popups.'); return; }
+
+            const styles = `
+        <style>
+            body{ font-family: Arial, sans-serif; margin:10px; }
+            .nota{ width:15cm; padding:18px; border:1px solid #111; box-sizing:border-box; }
+            .note-number-box{ position:absolute; right:16px; top:16px; border:1px solid #333; padding:8px; text-align:right; background:#fff; }
+            .line{ border-bottom:1px solid #444; padding:6px 0; margin:6px 0; }
+            .inline-input{ border:none; border-bottom:1px solid #000; font-size:14px; }
+        </style>
+    `;
+
+            w.document.open();
+            w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Imprimir Nota</title>${styles}</head><body>`);
+            // clonar el nodo y su HTML (notar que usamos outerHTML para obtener el HTML ya generado)
+            w.document.write(document.getElementById('notaParaImprimir').outerHTML);
+            w.document.write('</body></html>');
+            w.document.close();
+
+            // esperar para que renderice y disparar print
+            setTimeout(() => {
+                try {
+                    w.focus();
+                    w.print();
+                    // w.close(); // opcional, navegadores/ iPad pueden bloquear cierre automático
+                } catch (e) {
+                    alert('Error al imprimir. Usa el diálogo de la ventana nueva para imprimir/guardar PDF.');
+                }
+            }, 300);
+        }
+
+        /* Guardar PDF: reutiliza la ventana nueva + print => el usuario usa "Guardar como PDF" */
+        function guardarPDF() {
+            imprimirNota();
+        }
+    </script>
+</body>
+
+</html>
