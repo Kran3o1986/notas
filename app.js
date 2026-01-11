@@ -55,7 +55,7 @@ async function cargarExcelAutomatico() {
 // Inicializar selects, checkboxes y eventos
 function inicializarUI() {
     // Tiers
-    tierSelect.innerHTML = '<option value="">Selecciona un tier</option>';
+    tierSelect.innerHTML = '<option value="">Sin armazón</option>';
     DATA_TIERS.forEach((t, idx) => {
         const opt = document.createElement('option');
         opt.value = idx;
@@ -240,34 +240,50 @@ function recalcular() {
     totalSpan.textContent = formatearCLP(total);
     mensajesDiv.innerHTML = mensajes.join('<br>');
 
-    dibujarEtiqueta(base, extrasSel, total);
+    // Permitir generar etiqueta si hay tier O extras seleccionados
+    if (base.nombre || extrasSel.length > 0) {
+        dibujarEtiqueta(base, extrasSel, total);
+    } else {
+        etiquetaContainer.innerHTML = '<p>Selecciona un tier o extras para generar la etiqueta</p>';
+        btnImprimir.style.display = 'none';
+    }
 }
 
 // Dibujar la etiqueta final con código de barras
 function dibujarEtiqueta(base, extrasSel, total) {
-    if (!base.nombre) {
-        etiquetaContainer.innerHTML = '<p>Selecciona un tier para generar la etiqueta</p>';
+    // Validar que haya al menos algo que mostrar
+    if (!base.nombre && extrasSel.length === 0) {
+        etiquetaContainer.innerHTML = '<p>Selecciona un tier o extras para generar la etiqueta</p>';
         btnImprimir.style.display = 'none';
         return;
     }
 
-    // Limpiar el nombre del tier (quitar "Armazón" si existe)
-    const nombreLimpio = base.nombre.replace('Armazón ', '').toUpperCase();
+    // Determinar qué mostrar en la etiqueta
+    let nombreProducto = '';
+    let codigoBarra = base.codigo_barra || '000000000000'; // Código genérico si no hay tier
 
-    const extrasTexto = extrasSel.length > 0
-        ? extrasSel.map(e => e.nombre).join(' + ')
-        : '';
+    if (base.nombre && extrasSel.length > 0) {
+        // Tier + Extras
+        const nombreLimpio = base.nombre.replace('Armazón ', '').toUpperCase();
+        const extrasTexto = extrasSel.map(e => e.nombre).join(' + ');
+        nombreProducto = `${nombreLimpio}<br><span class="extras-text">${extrasTexto}</span>`;
+    } else if (base.nombre) {
+        // Solo Tier
+        nombreProducto = base.nombre.replace('Armazón ', '').toUpperCase();
+    } else {
+        // Solo Extras (sin tier)
+        nombreProducto = extrasSel.map(e => e.nombre).join(' + ').toUpperCase();
+    }
 
     // Crear estructura HTML con SVG para código de barras
     etiquetaContainer.innerHTML = `
     <div class="etiqueta-simplificada-container">
       <div class="barcode-area-simplified">
         <svg id="barcode"></svg>
-        <div class="barcode-number-simplified">${base.codigo_barra}</div>
+        <div class="barcode-number-simplified">${codigoBarra}</div>
       </div>
       <div class="producto-precio-simplified">
-        <div class="product-text">${nombreLimpio}</div>
-        ${extrasTexto ? `<div class="extras-text">${extrasTexto}</div>` : ''}
+        <div class="product-text">${nombreProducto}</div>
         <div class="price-text">${formatearCLP(total)}</div>
       </div>
     </div>
@@ -275,7 +291,7 @@ function dibujarEtiqueta(base, extrasSel, total) {
 
     // Generar código de barras usando JsBarcode
     try {
-        JsBarcode("#barcode", base.codigo_barra, {
+        JsBarcode("#barcode", codigoBarra, {
             format: "CODE128",
             displayValue: false,
             width: 2,
