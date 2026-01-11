@@ -1,349 +1,295 @@
-// =================================================================
-// 1. DEFINICIÓN DEL CATÁLOGO MAESTRO (132 PRODUCTOS)
-//    *** DATOS EXTRAÍDOS DIRECTAMENTE DE LA TABLA ADJUNTA ***
-// =================================================================
+// Referencias a elementos del DOM
+const tierSelect = document.getElementById('tier');
+const extrasContainer = document.getElementById('extras-container');
+const cuponSelect = document.getElementById('cupon');
+const etiquetaContainer = document.getElementById('etiquetaGenerada');
+const btnImprimir = document.getElementById('btnImprimir');
+const statusText = document.getElementById('status');
+const mensajesDiv = document.getElementById('mensajes');
+const subtotalSpan = document.getElementById('subtotal');
+const totalSpan = document.getElementById('total');
 
-// Usamos esta estructura para manejar la granularidad de precios por TIER
-const RAW_CATALOG_DATA = [
-    // TIER 1
-    { tier: "T1", descripcion: "CLIP ON", precio: 40000.00, graduacion_key: "NOGRAD", final_sku: "T1ClpOn" },
-    { tier: "T1", descripcion: "NEUTROS CON AR VERDE", precio: 56000.00, graduacion_key: "NOGRAD", final_sku: "T1LeNeArVr" },
-    { tier: "T1", descripcion: "NEUTROS POLARIZADO", precio: 104000.00, graduacion_key: "NOGRAD", final_sku: "T1LeNeSol" },
-    { tier: "T1", descripcion: "PARA COMPUTO NEUTROS", precio: 89000.00, graduacion_key: "NOGRAD", final_sku: "T1LeNeCom" },
-    { tier: "T1", descripcion: "LENTE MONOFOCAL - AR AZUL", precio: 177000.00, graduacion_key: "MONO", final_sku: "T1LeMoArAz" },
-    { tier: "T1", descripcion: "LENTE MONOFOCAL - HI", precio: 177000.00, graduacion_key: "MONO", final_sku: "T1LeMoHi" },
-    { tier: "T1", descripcion: "LENTE MONOFOCAL - AR AZUL + HI", precio: 177000.00, graduacion_key: "MONO", final_sku: "T1LeMoArAzHi" },
-    { tier: "T1", descripcion: "LENTE MONOFOCAL POLARIZADO", precio: 188000.00, graduacion_key: "MONO", final_sku: "T1LeMoSol" },
-    { tier: "T1", descripcion: "LENTE MONOFOCAL FOTOCROMATICO", precio: 188000.00, graduacion_key: "MONO", final_sku: "T1LeMoFo" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWTON", precio: 246000.00, graduacion_key: "NEWTON", final_sku: "T1LeProNew" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWTON + AR AZUL", precio: 277000.00, graduacion_key: "NEWTON", final_sku: "T1LeProNewArAz" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWTON POLARIZADO", precio: 297000.00, graduacion_key: "NEWTON", final_sku: "T1LeProNewSol" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWTON + FOTO", precio: 297000.00, graduacion_key: "NEWTON", final_sku: "T1LeProNewFo" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWTON + FOTO + HI", precio: 316000.00, graduacion_key: "NEWTON", final_sku: "T1LeProNewFoHi" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWTON + HI", precio: 277000.00, graduacion_key: "NEWTON", final_sku: "T1LeProNewHi" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWTON + HI + AR AZUL", precio: 306000.00, graduacion_key: "NEWTON", final_sku: "T1LeProNewHiArAz" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWPLUS", precio: 288000.00, graduacion_key: "NEWPLUS", final_sku: "T1LeProNewPl" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWPLUS + AR AZUL", precio: 318000.00, graduacion_key: "NEWPLUS", final_sku: "T1LeProNewPlArAz" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWPLUS POLARIZADO", precio: 338000.00, graduacion_key: "NEWPLUS", final_sku: "T1LeProNewPlSol" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWPLUS + FOTO", precio: 338000.00, graduacion_key: "NEWPLUS", final_sku: "T1LeProNewPlFo" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWPLUS + FOTO + HI", precio: 358000.00, graduacion_key: "NEWPLUS", final_sku: "T1LeProNewPlFoHi" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWPLUS + HI", precio: 318000.00, graduacion_key: "NEWPLUS", final_sku: "T1LeProNewPlHi" },
-    { tier: "T1", descripcion: "LENTE PROGRESIVO NEWPLUS + HI + AR AZUL", precio: 348000.00, graduacion_key: "NEWPLUS", final_sku: "T1LeProNewPlHiArAz" },
-    
-    // TIER 2
-    { tier: "T2", descripcion: "CLIP ON", precio: 36000.00, graduacion_key: "NOGRAD", final_sku: "T2ClpOn" },
-    { tier: "T2", descripcion: "NEUTROS CON AR VERDE", precio: 51000.00, graduacion_key: "NOGRAD", final_sku: "T2LeNeArVr" },
-    { tier: "T2", descripcion: "NEUTROS POLARIZADO", precio: 94000.00, graduacion_key: "NOGRAD", final_sku: "T2LeNeSol" },
-    { tier: "T2", descripcion: "PARA COMPUTO NEUTROS", precio: 80000.00, graduacion_key: "NOGRAD", final_sku: "T2LeNeCom" },
-    { tier: "T2", descripcion: "LENTE MONOFOCAL - AR AZUL", precio: 159000.00, graduacion_key: "MONO", final_sku: "T2LeMoArAz" },
-    { tier: "T2", descripcion: "LENTE MONOFOCAL - HI", precio: 159000.00, graduacion_key: "MONO", final_sku: "T2LeMoHi" },
-    { tier: "T2", descripcion: "LENTE MONOFOCAL - AR AZUL + HI", precio: 159000.00, graduacion_key: "MONO", final_sku: "T2LeMoArAzHi" },
-    { tier: "T2", descripcion: "LENTE MONOFOCAL POLARIZADO", precio: 169000.00, graduacion_key: "MONO", final_sku: "T2LeMoSol" },
-    { tier: "T2", descripcion: "LENTE MONOFOCAL FOTOCROMATICO", precio: 169000.00, graduacion_key: "MONO", final_sku: "T2LeMoFo" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWTON", precio: 221000.00, graduacion_key: "NEWTON", final_sku: "T2LeProNew" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWTON + AR AZUL", precio: 249000.00, graduacion_key: "NEWTON", final_sku: "T2LeProNewArAz" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWTON POLARIZADO", precio: 267000.00, graduacion_key: "NEWTON", final_sku: "T2LeProNewSol" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWTON + FOTO", precio: 267000.00, graduacion_key: "NEWTON", final_sku: "T2LeProNewFo" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWTON + FOTO + HI", precio: 284000.00, graduacion_key: "NEWTON", final_sku: "T2LeProNewFoHi" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWTON + HI", precio: 249000.00, graduacion_key: "NEWTON", final_sku: "T2LeProNewHi" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWTON + HI + AR AZUL", precio: 275000.00, graduacion_key: "NEWTON", final_sku: "T2LeProNewHiArAz" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWPLUS", precio: 259000.00, graduacion_key: "NEWPLUS", final_sku: "T2LeProNewPl" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWPLUS + AR AZUL", precio: 286000.00, graduacion_key: "NEWPLUS", final_sku: "T2LeProNewPlArAz" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWPLUS POLARIZADO", precio: 304000.00, graduacion_key: "NEWPLUS", final_sku: "T2LeProNewPlSol" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWPLUS + FOTO", precio: 304000.00, graduacion_key: "NEWPLUS", final_sku: "T2LeProNewPlFo" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWPLUS + FOTO + HI", precio: 322000.00, graduacion_key: "NEWPLUS", final_sku: "T2LeProNewPlFoHi" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWPLUS + HI", precio: 286000.00, graduacion_key: "NEWPLUS", final_sku: "T2LeProNewPlHi" },
-    { tier: "T2", descripcion: "LENTE PROGRESIVO NEWPLUS + HI + AR AZUL", precio: 313000.00, graduacion_key: "NEWPLUS", final_sku: "T2LeProNewPlHiArAz" },
+// Datos en memoria
+let DATA_TIERS = [];
+let DATA_EXTRAS = [];
+let DATA_CUPONES = [];
 
-    // TIER 3
-    { tier: "T3", descripcion: "LENTE DE SOL NEUTRO", precio: 119000.00, graduacion_key: "NOGRAD", final_sku: "T3LeNeSol" }, // Lente de sol neutro
-    { tier: "T3", descripcion: "LENTE DE SOL GRADUADO", precio: 188000.00, graduacion_key: "MONO", final_sku: "T3LeMoSol" }, // Lente de sol graduado
-    { tier: "T3", descripcion: "LENTE MONOFOCAL - AR AZUL", precio: 159000.00, graduacion_key: "MONO", final_sku: "T3LeMoArAz" },
-    { tier: "T3", descripcion: "LENTE MONOFOCAL - HI", precio: 168000.00, graduacion_key: "MONO", final_sku: "T3LeMoHi" },
-    { tier: "T3", descripcion: "LENTE MONOFOCAL - AR AZUL + HI", precio: 177000.00, graduacion_key: "MONO", final_sku: "T3LeMoArAzHi" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWTON", precio: 207000.00, graduacion_key: "NEWTON", final_sku: "T3LeProNew" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWTON + AR AZUL", precio: 227000.00, graduacion_key: "NEWTON", final_sku: "T3LeProNewArAz" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWTON POLARIZADO", precio: 267000.00, graduacion_key: "NEWTON", final_sku: "T3LeProNewSol" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWTON + FOTO", precio: 267000.00, graduacion_key: "NEWTON", final_sku: "T3LeProNewFo" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWTON + FOTO + HI", precio: 287000.00, graduacion_key: "NEWTON", final_sku: "T3LeProNewFoHi" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWTON + HI", precio: 227000.00, graduacion_key: "NEWTON", final_sku: "T3LeProNewHi" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWTON + HI + AR AZUL", precio: 257000.00, graduacion_key: "NEWTON", final_sku: "T3LeProNewHiArAz" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWPLUS", precio: 247000.00, graduacion_key: "NEWPLUS", final_sku: "T3LeProNewPl" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWPLUS + AR AZUL", precio: 267000.00, graduacion_key: "NEWPLUS", final_sku: "T3LeProNewPlArAz" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWPLUS POLARIZADO", precio: 307000.00, graduacion_key: "NEWPLUS", final_sku: "T3LeProNewPlSol" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWPLUS + FOTO", precio: 307000.00, graduacion_key: "NEWPLUS", final_sku: "T3LeProNewPlFo" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWPLUS + FOTO + HI", precio: 327000.00, graduacion_key: "NEWPLUS", final_sku: "T3LeProNewPlFoHi" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWPLUS + HI", precio: 267000.00, graduacion_key: "NEWPLUS", final_sku: "T3LeProNewPlHi" },
-    { tier: "T3", descripcion: "LENTE PROGRESIVO NEWPLUS + HI + AR AZUL", precio: 297000.00, graduacion_key: "NEWPLUS", final_sku: "T3LeProNewPlHiArAz" },
-    { tier: "T3", descripcion: "NEUTROS CON AR VERDE", precio: 51000.00, graduacion_key: "NOGRAD", final_sku: "T3LeNeArVr" },
-    { tier: "T3", descripcion: "PARA COMPUTO NEUTROS", precio: 64000.00, graduacion_key: "NOGRAD", final_sku: "T3LeNeCom" },
+// Cargar Excel ripley.xlsx automáticamente
+async function cargarExcelAutomatico() {
+    try {
+        const response = await fetch('ripley.xlsx');
+        if (!response.ok) throw new Error('No se encontró ripley.xlsx');
 
-    // TIER 4
-    { tier: "T4", descripcion: "CLIP ON", precio: 32000.00, graduacion_key: "NOGRAD", final_sku: "T4ClpOn" },
-    { tier: "T4", descripcion: "LENTE MONOFOCAL - AR AZUL", precio: 119000.00, graduacion_key: "MONO", final_sku: "T4LeMoArAz" },
-    { tier: "T4", descripcion: "LENTE MONOFOCAL - HI", precio: 159000.00, graduacion_key: "MONO", final_sku: "T4LeMoHi" },
-    { tier: "T4", descripcion: "LENTE MONOFOCAL - AR AZUL + HI", precio: 168000.00, graduacion_key: "MONO", final_sku: "T4LeMoArAzHi" },
-    { tier: "T4", descripcion: "LENTE MONOFOCAL POLARIZADO", precio: 188000.00, graduacion_key: "MONO", final_sku: "T4LeMoSol" },
-    { tier: "T4", descripcion: "LENTE MONOFOCAL FOTOCROMATICO", precio: 168000.00, graduacion_key: "MONO", final_sku: "T4LeMoFo" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWTON", precio: 196000.00, graduacion_key: "NEWTON", final_sku: "T4LeProNew" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWTON + AR AZUL", precio: 207000.00, graduacion_key: "NEWTON", final_sku: "T4LeProNewArAz" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWTON POLARIZADO", precio: 267000.00, graduacion_key: "NEWTON", final_sku: "T4LeProNewSol" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWTON + FOTO", precio: 267000.00, graduacion_key: "NEWTON", final_sku: "T4LeProNewFo" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWTON + FOTO + HI", precio: 287000.00, graduacion_key: "NEWTON", final_sku: "T4LeProNewFoHi" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWTON + HI", precio: 207000.00, graduacion_key: "NEWTON", final_sku: "T4LeProNewHi" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWTON + HI + AR AZUL", precio: 237000.00, graduacion_key: "NEWTON", final_sku: "T4LeProNewHiArAz" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWPLUS", precio: 227000.00, graduacion_key: "NEWPLUS", final_sku: "T4LeProNewPl" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWPLUS + AR AZUL", precio: 247000.00, graduacion_key: "NEWPLUS", final_sku: "T4LeProNewPlArAz" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWPLUS POLARIZADO", precio: 297000.00, graduacion_key: "NEWPLUS", final_sku: "T4LeProNewPlSol" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWPLUS + FOTO", precio: 297000.00, graduacion_key: "NEWPLUS", final_sku: "T4LeProNewPlFo" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWPLUS + FOTO + HI", precio: 316000.00, graduacion_key: "NEWPLUS", final_sku: "T4LeProNewPlFoHi" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWPLUS + HI", precio: 247000.00, graduacion_key: "NEWPLUS", final_sku: "T4LeProNewPlHi" },
-    { tier: "T4", descripcion: "LENTE PROGRESIVO NEWPLUS + HI + AR AZUL", precio: 277000.00, graduacion_key: "NEWPLUS", final_sku: "T4LeProNewPlHiArAz" },
-    { tier: "T4", descripcion: "LENTE DE SOL NEUTRO", precio: 104000.00, graduacion_key: "NOGRAD", final_sku: "T4LeNeSol" },
-    { tier: "T4", descripcion: "LENTE DE SOL GRADUADO", precio: 168000.00, graduacion_key: "MONO", final_sku: "T4LeMoSol" },
-    { tier: "T4", descripcion: "NEUTROS CON AR VERDE", precio: 45000.00, graduacion_key: "NOGRAD", final_sku: "T4LeNeArVr" },
-    { tier: "T4", descripcion: "PARA COMPUTO NEUTROS", precio: 64000.00, graduacion_key: "NOGRAD", final_sku: "T4LeNeCom" },
+        const arrayBuffer = await response.arrayBuffer();
+        const data = new Uint8Array(arrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-    // TIER 5 (Lentes)
-    { tier: "T5", descripcion: "CLIP ON", precio: 32000.00, graduacion_key: "NOGRAD", final_sku: "T5ClpOn" },
-    { tier: "T5", descripcion: "LENTE MONOFOCAL - AR AZUL", precio: 119000.00, graduacion_key: "MONO", final_sku: "T5LeMoArAz" },
-    { tier: "T5", descripcion: "LENTE MONOFOCAL - HI", precio: 159000.00, graduacion_key: "MONO", final_sku: "T5LeMoHi" },
-    { tier: "T5", descripcion: "LENTE MONOFOCAL - AR AZUL + HI", precio: 168000.00, graduacion_key: "MONO", final_sku: "T5LeMoArAzHi" },
-    { tier: "T5", descripcion: "LENTE MONOFOCAL POLARIZADO", precio: 188000.00, graduacion_key: "MONO", final_sku: "T5LeMoSol" },
-    { tier: "T5", descripcion: "LENTE MONOFOCAL FOTOCROMATICO", precio: 168000.00, graduacion_key: "MONO", final_sku: "T5LeMoFo" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWTON", precio: 196000.00, graduacion_key: "NEWTON", final_sku: "T5LeProNew" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWTON + AR AZUL", precio: 207000.00, graduacion_key: "NEWTON", final_sku: "T5LeProNewArAz" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWTON POLARIZADO", precio: 267000.00, graduacion_key: "NEWTON", final_sku: "T5LeProNewSol" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWTON + FOTO", precio: 267000.00, graduacion_key: "NEWTON", final_sku: "T5LeProNewFo" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWTON + FOTO + HI", precio: 287000.00, graduacion_key: "NEWTON", final_sku: "T5LeProNewFoHi" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWTON + HI", precio: 207000.00, graduacion_key: "NEWTON", final_sku: "T5LeProNewHi" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWTON + HI + AR AZUL", precio: 237000.00, graduacion_key: "NEWTON", final_sku: "T5LeProNewHiArAz" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWPLUS", precio: 227000.00, graduacion_key: "NEWPLUS", final_sku: "T5LeProNewPl" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWPLUS + AR AZUL", precio: 247000.00, graduacion_key: "NEWPLUS", final_sku: "T5LeProNewPlArAz" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWPLUS POLARIZADO", precio: 297000.00, graduacion_key: "NEWPLUS", final_sku: "T5LeProNewPlSol" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWPLUS + FOTO", precio: 297000.00, graduacion_key: "NEWPLUS", final_sku: "T5LeProNewPlFo" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWPLUS + FOTO + HI", precio: 316000.00, graduacion_key: "NEWPLUS", final_sku: "T5LeProNewPlFoHi" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWPLUS + HI", precio: 247000.00, graduacion_key: "NEWPLUS", final_sku: "T5LeProNewPlHi" },
-    { tier: "T5", descripcion: "LENTE PROGRESIVO NEWPLUS + HI + AR AZUL", precio: 277000.00, graduacion_key: "NEWPLUS", final_sku: "T5LeProNewPlHiArAz" },
-    { tier: "T5", descripcion: "LENTE DE SOL NEUTRO", precio: 104000.00, graduacion_key: "NOGRAD", final_sku: "T5LeNeSol" },
-    { tier: "T5", descripcion: "LENTE DE SOL GRADUADO", precio: 168000.00, graduacion_key: "MONO", final_sku: "T5LeMoSol" },
-    { tier: "T5", descripcion: "NEUTROS CON AR VERDE", precio: 45000.00, graduacion_key: "NOGRAD", final_sku: "T5LeNeArVr" },
-    { tier: "T5", descripcion: "PARA COMPUTO NEUTROS", precio: 64000.00, graduacion_key: "NOGRAD", final_sku: "T5LeNeCom" },
+        const rows = jsonData.map(r => ({
+            producto: String(r.Producto || '').trim(),
+            precio: Number(r.Precio) || 0,
+            codigo_barra: String(r.codigo_barra || '').trim()
+        }));
 
-    // TIER 5 (Micas) - Precios y SKU exclusivos
-    { tier: "T5", descripcion: "MICAS MONOFOCAL AR VERDE", precio: 40000.00, graduacion_key: "MONO", final_sku: "T5MicMoArVr" },
-    { tier: "T5", descripcion: "MICAS MONOFOCAL AR AZUL", precio: 40000.00, graduacion_key: "MONO", final_sku: "T5MicMoArAz" },
-    { tier: "T5", descripcion: "MICAS MONOFOCAL FOTOCROMATICO", precio: 104000.00, graduacion_key: "MONO", final_sku: "T5MicMoFo" },
-    { tier: "T5", descripcion: "MICAS MONOFOCAL POLARIZADO", precio: 104000.00, graduacion_key: "MONO", final_sku: "T5MicMoArSol" },
-    { tier: "T5", descripcion: "MICAS NEUTRAS POLARIZADAS", precio: 104000.00, graduacion_key: "NOGRAD", final_sku: "T5MicNeSol" },
-    { tier: "T5", descripcion: "MICAS PROGRESIVO NEWTON AR VERDE", precio: 120000.00, graduacion_key: "NEWTON", final_sku: "T5MicProNew" },
-    { tier: "T5", descripcion: "MICAS PROGRESIVO NEWTON POLARIZADO", precio: 160000.00, graduacion_key: "NEWTON", final_sku: "T5MicProNewSol" },
-    { tier: "T5", descripcion: "MICAS PROGRESIVO NEWTON AR AZUL", precio: 120000.00, graduacion_key: "NEWTON", final_sku: "T5MicProNewArAz" },
-    { tier: "T5", descripcion: "MICAS PROGRESIVO NEWTON FOTOCROMATICO", precio: 160000.00, graduacion_key: "NEWTON", final_sku: "T5MicProNewFo" },
-    { tier: "T5", descripcion: "MICAS PROGRESIVO NEWTON + HI", precio: 160000.00, graduacion_key: "NEWTON", final_sku: "T5MicProNewHi" },
-    { tier: "T5", descripcion: "MICAS PROGRESIVO NEWTON + HI + AR AZUL", precio: 160000.00, graduacion_key: "NEWTON", final_sku: "T5MicProNewHiArAz" },
-    { tier: "T5", descripcion: "MICAS PROGRESIVO NEWPLUS AR VERDE", precio: 160000.00, graduacion_key: "NEWPLUS", final_sku: "T5MicProNewPl" },
-    { tier: "T5", descripcion: "MICAS PROGRESIVO NEWPLUS AR AZUL", precio: 160000.00, graduacion_key: "NEWPLUS", final_sku: "T5MicProNewPlArAz" },
-    { tier: "T5", descripcion: "MICAS PROGRESIVO NEWPLUS POLARIZADO", precio: 200000.00, graduacion_key: "NEWPLUS", final_sku: "T5MicProNewPlSol" },
-    { tier: "T5", descripcion: "MICAS PROGRESIVO NEWPLUS FOTOCROMATICO", precio: 200000.00, graduacion_key: "NEWPLUS", final_sku: "T5MicProNewPlFo" },
-    { tier: "T5", descripcion: "MICAS PROGRESIVO NEWPLUS + HI", precio: 200000.00, graduacion_key: "NEWPLUS", final_sku: "T5MicProNewPlHi" },
-    { tier: "T5", descripcion: "MICAS PROGRESIVO NEWPLUS + HI + AR AZUL", precio: 200000.00, graduacion_key: "NEWPLUS", final_sku: "T5MicProNewPlHiArAz" },
-];
+        DATA_TIERS = rows.filter(r => r.producto.startsWith('Armazón Tier'));
+        DATA_EXTRAS = rows.filter(r =>
+            ['Hi-index', 'Fotocromatico', 'Clip-on', 'Ar Azul',
+                'Polarizado', 'Newton', 'Newton Plus'].includes(r.producto)
+        );
+        DATA_CUPONES = rows.filter(r =>
+            r.producto === 'Descuento 7000' || r.producto === 'Descuento 50%'
+        );
 
-const PRODUCT_CATALOG = RAW_CATALOG_DATA.map(item => ({
-    tier: item.tier,
-    graduacion: item.graduacion_key,
-    combinacion_final: item.descripcion, // La descripción es la opción de cara al usuario
-    precio: item.precio,
-    final_sku: item.final_sku,
-}));
-
-
-// =================================================================
-// 2. ELEMENTOS Y CONFIGURACIÓN
-// =================================================================
-
-const tier = document.getElementById("tier");
-const graduacion = document.getElementById("graduacion");
-const combinacion_final = document.getElementById("combinacion_final");
-const generar = document.getElementById("generar");
-const preview = document.getElementById("preview");
-
-// El orden de selectores: solo 3
-const SELECT_CONTROLS = [
-    { id: "tier", element: tier, label: "Seleccionar Tier" },
-    { id: "graduacion", element: graduacion, label: "Graduación" },
-    { id: "combinacion_final", element: combinacion_final, label: "Combinación / Producto Final" }
-];
-
-// Mapeo para nombres de opciones de Graduación
-const OPTION_LABELS_GRAD = {
-    MONO: 'Monofocal',
-    NEWTON: 'Progresivo Newton',
-    NEWPLUS: 'Progresivo Newton Plus',
-    NOGRAD: 'Sin graduación',
-    // Usamos el texto de la descripción para la combinacion_final
-};
-
-
-// =================================================================
-// 3. FUNCIONES DE LÓGICA
-// =================================================================
-
-function formatPrice(price) {
-    if (price === undefined || price === null) return "Precio no disponible";
-    // Usamos Intl.NumberFormat para un formato de moneda correcto
-    return new Intl.NumberFormat('es-CO', { // Puedes cambiar 'es-CO' a tu región de preferencia
-        style: 'currency',
-        currency: 'USD', // O COP, MXN, etc.
-        minimumFractionDigits: 0
-    }).format(price);
+        inicializarUI();
+        statusText.innerText = `✅ ${rows.length} filas cargadas.`;
+        statusText.style.color = 'green';
+    } catch (err) {
+        console.error(err);
+        statusText.innerText = '❌ Error al leer ripley.xlsx';
+        statusText.style.color = 'red';
+    }
 }
 
-function resetNextSelects(startIndex) {
-    for (let i = startIndex; i < SELECT_CONTROLS.length; i++) {
-        const control = SELECT_CONTROLS[i];
-        control.element.innerHTML = `<option value="">-- Selecciona --</option>`;
-        control.element.value = "";
-        control.element.disabled = true;
-    }
-    generar.disabled = true;
-    preview.innerHTML = "";
-}
-
-function updateOptions(currentId) {
-    const currentIndex = SELECT_CONTROLS.findIndex(c => c.id === currentId);
-    resetNextSelects(currentIndex + 1);
-
-    const selections = {};
-    for (let i = 0; i <= currentIndex; i++) {
-        selections[SELECT_CONTROLS[i].id] = SELECT_CONTROLS[i].element.value;
-    }
-
-    if (selections[currentId] === "") {
-        return;
-    }
-
-    const nextControl = SELECT_CONTROLS[currentIndex + 1];
-    if (!nextControl) {
-        generar.disabled = false;
-        return;
-    }
-
-    // Filtrar el Catálogo basado en las selecciones previas
-    let filteredCatalog = PRODUCT_CATALOG.filter(product => {
-        let match = true;
-        ['tier', 'graduacion'].forEach(key => {
-            if (selections[key] && product[key] !== selections[key]) {
-                match = false;
-            }
-        });
-        return match;
+// Inicializar selects, checkboxes y eventos
+function inicializarUI() {
+    // Tiers
+    tierSelect.innerHTML = '<option value="">Selecciona un tier</option>';
+    DATA_TIERS.forEach((t, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = `${t.producto} (${formatearCLP(t.precio)})`;
+        tierSelect.appendChild(opt);
     });
 
-    let nextOptions = [];
-    if (nextControl.id === 'graduacion') {
-        // Para Graduación: obtenemos las 4 opciones principales que estén disponibles
-        nextOptions = ["MONO", "NOGRAD", "NEWTON", "NEWPLUS"].filter(
-            grad => filteredCatalog.some(p => p.graduacion === grad)
-        );
-        nextOptions.sort((a, b) => a.localeCompare(b));
-    } else {
-        // Para combinacion_final: Obtenemos objetos {value: descripción, price: precio}
-        const uniqueCombinations = {};
-        filteredCatalog.forEach(p => {
-             // La clave única es la descripción (value), el precio debe ser el que coincide con el TIER
-             uniqueCombinations[p.combinacion_final] = p.precio;
-        });
+    // Extras
+    extrasContainer.innerHTML = '<label class="form-label">Extras</label>';
+    DATA_EXTRAS.forEach((e, idx) => {
+        const id = `extra_${idx}`;
+        const div = document.createElement('div');
+        div.className = 'form-check';
+        div.innerHTML = `
+      <input class="form-check-input extra-check" type="checkbox" id="${id}"
+             data-nombre="${e.producto}" data-precio="${e.precio}">
+      <label class="form-check-label" for="${id}">
+        ${e.producto} (${formatearCLP(e.precio)})
+      </label>
+    `;
+        extrasContainer.appendChild(div);
+    });
 
-        // Convertir el mapa a un array de objetos para el select
-        nextOptions = Object.keys(uniqueCombinations).map(value => ({
-            value: value,
-            price: uniqueCombinations[value]
-        }));
-        
-        // Ordenamos por nombre de combinación
-        nextOptions.sort((a, b) => a.value.localeCompare(b.value));
-    }
+    // Cupones
+    cuponSelect.innerHTML = '<option value="">Sin cupón</option>';
+    DATA_CUPONES.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.producto;
+        opt.textContent = c.producto;
+        cuponSelect.appendChild(opt);
+    });
 
-    // 6. Popular el siguiente selector y habilitarlo
-    if (nextOptions.length > 0) {
-        let optionsHtml = `<option value="">-- Selecciona --</option>`;
-        
-        nextOptions.forEach(option => {
-            if (nextControl.id === 'graduacion') {
-                const label = OPTION_LABELS_GRAD[option] || option;
-                optionsHtml += `<option value="${option}">${label}</option>`;
-            } else if (nextControl.id === 'combinacion_final') {
-                // Aquí usamos el valor y el precio en la etiqueta visible
-                const priceFormatted = formatPrice(option.price);
-                optionsHtml += `<option value="${option.value}">${option.value} (${priceFormatted})</option>`;
+    tierSelect.addEventListener('change', recalcular);
+    extrasContainer.addEventListener('change', manejarExtrasChange);
+    cuponSelect.addEventListener('change', recalcular);
+
+    btnImprimir.addEventListener('click', () => {
+        const contenido = etiquetaContainer.innerHTML.trim();
+        if (contenido && !contenido.includes('Selecciona un tier')) {
+            console.log('Intentando imprimir...'); // Para debug
+            try {
+                // Pequeño delay para asegurar que el DOM esté listo
+                setTimeout(() => {
+                    console.log('Llamando a window.print()'); // Para debug
+                    window.print();
+                }, 100);
+            } catch (error) {
+                console.error('Error al imprimir:', error);
+                alert('Error al abrir el diálogo de impresión. Prueba con Ctrl+P');
             }
-        });
-
-        nextControl.element.innerHTML = optionsHtml;
-        nextControl.element.disabled = false;
-    }
-}
-
-
-// =================================================================
-// 4. ASIGNACIÓN DE EVENT LISTENERS
-// =================================================================
-
-SELECT_CONTROLS.forEach((control) => {
-    control.element.addEventListener("change", () => {
-        updateOptions(control.id);
-        
-        // Habilitar Generar si el último select tiene valor
-        if (control.id === 'combinacion_final' && control.element.value !== "") {
-            generar.disabled = false;
-        } else if (control.id === 'combinacion_final' && control.element.value === "") {
-            generar.disabled = true;
+        } else {
+            alert('Selecciona un tier primero');
         }
     });
-});
 
+    recalcular();
+}
 
-// =================================================================
-// 5. GENERACIÓN DE ETIQUETA
-// =================================================================
+// Formatear moneda CLP
+function formatearCLP(monto) {
+    return new Intl.NumberFormat('es-CL', {
+        style: 'currency',
+        currency: 'CLP',
+        minimumFractionDigits: 0
+    }).format(monto);
+}
 
-generar.addEventListener("click", () => {
-    const t = tier.value;
-    const g = graduacion.value;
-    const cf = combinacion_final.value; 
+// Manejar cambios en extras (todas las reglas de incompatibilidad)
+function manejarExtrasChange(e) {
+    if (!e.target.classList.contains('extra-check')) return;
 
-    // Buscamos el SKU final EXACTO usando la coincidencia de los 3 campos
-    const finalProduct = PRODUCT_CATALOG.find(p => 
-        p.tier === t && 
-        p.graduacion === g && 
-        p.combinacion_final === cf
-    );
+    const nombre = e.target.dataset.nombre;
+    const checks = [...document.querySelectorAll('.extra-check')];
+    const getCheck = n => checks.find(c => c.dataset.nombre === n);
 
-    const finalSKU = finalProduct ? finalProduct.final_sku : "SKU-NO-ENCONTRADO";
-    const precioUnitario = finalProduct ? formatPrice(finalProduct.precio) : "N/A";
-    const consignacion = "123456";
+    const chkArAzul = getCheck('Ar Azul');
+    const chkPolarizado = getCheck('Polarizado');
+    const chkFoto = getCheck('Fotocromatico');
+    const chkClip = getCheck('Clip-on');
+    const chkNewton = getCheck('Newton');
+    const chkNewtonPlus = getCheck('Newton Plus');
 
-    if (finalSKU === "SKU-NO-ENCONTRADO") {
-        preview.innerHTML = `<p style="color: red;">Error: La combinación seleccionada no es un producto válido en el catálogo.</p>`;
+    // 1. Polarizado y Fotocromatico son mutuamente excluyentes
+    if (nombre === 'Polarizado' && e.target.checked && chkFoto) {
+        chkFoto.checked = false;
+    }
+    if (nombre === 'Fotocromatico' && e.target.checked && chkPolarizado) {
+        chkPolarizado.checked = false;
+    }
+
+    // 2. Polarizado / Fotocromatico vs Ar Azul
+    if (nombre === 'Polarizado' || nombre === 'Fotocromatico') {
+        if (e.target.checked) {
+            if (chkArAzul) {
+                chkArAzul.checked = false;
+                chkArAzul.disabled = true;
+            }
+        } else {
+            if (chkArAzul &&
+                (!chkPolarizado || !chkPolarizado.checked) &&
+                (!chkFoto || !chkFoto.checked)) {
+                chkArAzul.disabled = false;
+            }
+        }
+    }
+
+    if (nombre === 'Ar Azul' && e.target.checked) {
+        if (chkPolarizado && chkPolarizado.checked) chkPolarizado.checked = false;
+        if (chkFoto && chkFoto.checked) chkFoto.checked = false;
+    }
+
+    // 3. Newton XOR Newton Plus
+    if (nombre === 'Newton' && e.target.checked && chkNewtonPlus) {
+        chkNewtonPlus.checked = false;
+    }
+    if (nombre === 'Newton Plus' && e.target.checked && chkNewton) {
+        chkNewton.checked = false;
+    }
+
+    recalcular();
+}
+
+// Obtener selección actual
+function obtenerSeleccion() {
+    let base = { nombre: null, precio: 0, codigo_barra: '' };
+
+    if (tierSelect.value !== '') {
+        const t = DATA_TIERS[Number(tierSelect.value)];
+        if (t) {
+            base = {
+                nombre: t.producto,
+                precio: t.precio,
+                codigo_barra: t.codigo_barra
+            };
+        }
+    }
+
+    const extrasSel = [];
+    const checks = document.querySelectorAll('.extra-check');
+    checks.forEach(chk => {
+        if (chk.checked) {
+            extrasSel.push({
+                nombre: chk.dataset.nombre,
+                precio: Number(chk.dataset.precio) || 0
+            });
+        }
+    });
+
+    const cupon = cuponSelect.value || null;
+
+    return { base, extrasSel, cupon };
+}
+
+// Recalcular subtotal, total y mensajes
+function recalcular() {
+    const { base, extrasSel, cupon } = obtenerSeleccion();
+    const mensajes = [];
+
+    const nombresExtras = extrasSel.map(e => e.nombre);
+    const redundante =
+        nombresExtras.includes('Clip-on') &&
+        (nombresExtras.includes('Polarizado') ||
+            nombresExtras.includes('Fotocromatico'));
+
+    if (redundante) {
+        mensajes.push(
+            '⚠️ Clip-on junto con Polarizado o Fotocromático es redundante.'
+        );
+    }
+
+    let subtotal = base.precio;
+    extrasSel.forEach(e => { subtotal += e.precio; });
+
+    let total = subtotal;
+    if (cupon === 'Descuento 7000') {
+        total = Math.max(0, subtotal - 7000);
+    } else if (cupon === 'Descuento 50%') {
+        total = subtotal / 2;
+    }
+
+    subtotalSpan.textContent = formatearCLP(subtotal);
+    totalSpan.textContent = formatearCLP(total);
+    mensajesDiv.innerHTML = mensajes.join('<br>');
+
+    dibujarEtiqueta(base, extrasSel, total);
+}
+
+// Dibujar la etiqueta final con código de barras
+function dibujarEtiqueta(base, extrasSel, total) {
+    if (!base.nombre) {
+        etiquetaContainer.innerHTML = '<p>Selecciona un tier para generar la etiqueta</p>';
+        btnImprimir.style.display = 'none';
         return;
     }
-    
-    // Generación de Etiqueta
-    preview.innerHTML = `
-        <div class="barcode">
-            <svg id="barcode"></svg>
-            <p style="font-size:20px; margin:5px 0;"><b>${finalSKU}</b></p>
-            <p style="font-size:18px;">Precio: ${precioUnitario}</p>
-            <p style="font-size:18px;">${consignacion}</p>
-        </div>
-    `;
 
-    JsBarcode("#barcode", finalSKU, {
-        format: "CODE128",
-        width: 3,
-        height: 90,
-        displayValue: false
-    });
-});
+    // Limpiar el nombre del tier (quitar "Armazón" si existe)
+    const nombreLimpio = base.nombre.replace('Armazón ', '').toUpperCase();
+
+    const extrasTexto = extrasSel.length > 0
+        ? extrasSel.map(e => e.nombre).join(' + ')
+        : '';
+
+    // Crear estructura HTML con SVG para código de barras
+    etiquetaContainer.innerHTML = `
+    <div class="etiqueta-simplificada-container">
+      <div class="barcode-area-simplified">
+        <svg id="barcode"></svg>
+        <div class="barcode-number-simplified">${base.codigo_barra}</div>
+      </div>
+      <div class="producto-precio-simplified">
+        <div class="product-text">${nombreLimpio}</div>
+        ${extrasTexto ? `<div class="extras-text">${extrasTexto}</div>` : ''}
+        <div class="price-text">${formatearCLP(total)}</div>
+      </div>
+    </div>
+  `;
+
+    // Generar código de barras usando JsBarcode
+    try {
+        JsBarcode("#barcode", base.codigo_barra, {
+            format: "CODE128",
+            displayValue: false,
+            width: 2,
+            height: 40,
+            margin: 0
+        });
+    } catch (error) {
+        console.error('Error generando código de barras:', error);
+        document.getElementById('barcode').innerHTML = '<text>Error en código de barras</text>';
+    }
+
+    // Mostrar botón de imprimir
+    btnImprimir.style.display = 'block';
+}
+
+// Iniciar
+window.addEventListener('load', cargarExcelAutomatico);
